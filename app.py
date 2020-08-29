@@ -4,7 +4,7 @@ from pymongo import MongoClient  # pymongo를 임포트 하기(패키지 인스�
 app = Flask(__name__)
 
 client = MongoClient('localhost', 27017)  # mongoDB는 27017 포트로 돌아갑니다.
-db = client.dbsparta  # 'dbsparta'라는 이름의 db를 만듭니다.
+db = client.mysite  # 'dbsparta'라는 이름의 db를 만듭니다.
 
 
 ## HTML을 주는 부분
@@ -15,7 +15,7 @@ def home():
 
 ## API 역할을 하는 부분
 @app.route('/chat', methods=['POST'])
-def write_review():
+def chat_send():
 	# 1. 클라이언트가 준 id, content 가져오기.
     mid = request.form['mid']
     content = request.form['content']
@@ -35,13 +35,28 @@ def write_review():
 
 
 @app.route('/chat', methods=['GET'])
-def read_reviews():
+def chat_read():
     chat = list(db.chat.find({}, {'_id': 0}))
     return jsonify({
         'result': 'success',
         'chat': chat
     })
 
+@app.route('/login', methods=['POST'])
+def chat_login():
+    name = request.form['name']
+    pwd = request.form['pwd']
+
+    login = {
+        'name' : name,
+        'pwd' : pwd
+    }
+
+    db.login.insert_one(login)
+
+    return jsonify({
+        'result': 'success'
+    })
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000, debug=True)
